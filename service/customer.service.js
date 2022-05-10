@@ -35,6 +35,9 @@ const createCustomer = async ({ name, email, payment }) => {
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [{ price: 'price_1KxiDlEcdTG5MDVJZ7aeHYIC' }],
+      // phone 
+      // number
+      // pin
     });
 
     return {
