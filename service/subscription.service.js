@@ -5,9 +5,10 @@ const getAllActiveSubscriptions = async () => {
     const subscriptions = await stripe.subscriptions.list({
       status: 'active',
     });
-    console.log('sub service!', subscriptions);
 
-    return subscriptions;
+    const parse_sub = subscriptions.data.map((e, i) => e.metadata);
+
+    return parse_sub;
   } catch (error) {
     console.log(error);
     return error.response;

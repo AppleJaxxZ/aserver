@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 
 const passport = require('passport');
 //api
-const customer = require('./customer');
+const checkout = require('./checkout');
 const subscription = require('./subscription');
 const auth = require('./user');
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
@@ -35,7 +35,7 @@ mongoose
 app.use(passport.initialize());
 require('./config/passport')(passport);
 
-app.use('/api/customer', customer);
+app.use('/api/checkout', checkout);
 app.use('/api/subscription', subscription);
 app.use('/api/auth', auth);
 

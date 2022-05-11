@@ -1,8 +1,8 @@
 const express = require('express');
 const {
-  createCustomer,
+  checkOut,
   deleteCustomer,
-} = require('./controller/customer.controller');
+} = require('./controller/checkout.controller');
 const passport = require('passport');
 require('dotenv').config();
 const router = express.Router();
@@ -11,7 +11,7 @@ router.use(express.json());
 
 router
   .route('/')
-  .post(passport.authenticate('jwt', { session: false }), createCustomer)
+  .post(passport.authenticate('jwt', { session: false }), checkOut)
   .delete(deleteCustomer);
 
 module.exports = router;

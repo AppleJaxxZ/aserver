@@ -1,2 +1,2 @@
-module.exports.customerService = require('./customer.service');
+module.exports.checkOutService = require('./checkout.service');
 module.exports.subscriptionService = require('./subscription.service');
