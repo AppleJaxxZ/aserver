@@ -11,11 +11,21 @@ const getAllActiveSubscriptions = async (req, res) => {
 
 const getMySubscription = async (req, res) => {
   //FIND BY SUBSCRIPTION ID
-  const { data: customer_subscription } = await stripe.subscriptions.list({
-    customer: req.body.customer_id,
-  });
-  console.log(customer_subscription);
-  res.send({});
+
+  if (req.body.customer_id) {
+    const { data: my_subscription } = await stripe.subscriptions.list({
+      customer: req.body.customer_id,
+    });
+    if (my_subscription.length === 0) {
+      res.send({ active: null });
+    }
+
+    if (my_subscription.length === 1) {
+      res.send({ active: my_subscription[0].status });
+    }
+  } else {
+    res.send({ message: 'Something went wrong! Customer does not exist' });
+  }
 };
 
 module.exports = {
