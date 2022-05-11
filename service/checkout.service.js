@@ -70,7 +70,7 @@ const updateCustomerSubscription = async (
 
 const checkOut = async ({ name, email, payment }) => {
   try {
-    const { customer_id, _id, phone, pin } = await User.findOne({
+    const { customer_id, _id, phone, pin, dateOfBirth } = await User.findOne({
       email: email,
     });
 
@@ -83,7 +83,7 @@ const checkOut = async ({ name, email, payment }) => {
       const validatedAndSubscribed = await validateCardAndSubscribe(
         payment,
         customer_id,
-        { email, name, phone, pin }
+        { email, name, phone, pin, dateOfBirth: dateOfBirth.replace(/-/g, '/') }
       );
 
       const { _doc } = await User.findOneAndUpdate(
@@ -106,7 +106,7 @@ const checkOut = async ({ name, email, payment }) => {
       const updated_customer = await updateCustomerSubscription(
         subscription,
         customer_id,
-        { email, name, phone, pin }
+        { email, name, phone, pin, dateOfBirth: dateOfBirth.replace(/-/g, '/') }
       );
 
       return {
