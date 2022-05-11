@@ -74,10 +74,11 @@ const checkOut = async ({ name, email, payment }) => {
       email: email,
     });
 
-    //FIND BY SUBSCRIPTION ID
+    // FIND BY SUBSCRIPTION ID
     const { data: customer_subscription } = await stripe.subscriptions.list({
       customer: customer_id,
     });
+
     // Create the Subscription if no subscription
     if (customer_subscription.length === 0) {
       const validatedAndSubscribed = await validateCardAndSubscribe(
@@ -87,7 +88,7 @@ const checkOut = async ({ name, email, payment }) => {
       );
 
       const { _doc } = await User.findOneAndUpdate(
-        { id: _id },
+        { _id: _id },
         { subscription_id: validatedAndSubscribed.createdSubscription.id },
         { new: true }
       ).exec();
