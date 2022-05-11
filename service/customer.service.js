@@ -18,32 +18,105 @@ Parameters Required,
     }
 }
 */
-const createCustomer = async ({ name, email, payment }) => {
-  try {
-    //Create Customer
-    const customer = await stripe.customers.create({
-      email,
-      name,
-    });
 
-    const token = await createTokenCard(payment);
+const validateCardAndSubscribe = async (payment, customerId) => {
+  const token = await createTokenCard(payment);
 
-    const card = await stripe.customers.createSource(customer.id, {
-      source: token.id,
-    });
+  const card = await stripe.customers.createSource(customerId, {
+    source: token.id,
+  });
 
-    const subscription = await stripe.subscriptions.create({
-      customer: customer.id,
-      items: [{ price: 'price_1KxiDlEcdTG5MDVJZ7aeHYIC' }],
-      // phone 
-      // number
-      // pin
-    });
+  const subscription = await stripe.subscriptions.create({
+    customer: customerId,
+    items: [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
+  });
+  return {
+    card,
+    subscription,
+  };
+};
 
+const updateCustomerSubscription = async (
+  { status, id },
+  customer,
+  payment
+) => {
+  //If customer subscription status is not active
+  if (status !== 'active') {
+    // Delete the subscription and subscribe
+    await stripe.subscriptions.del(id);
+    // Pay and subscribe
+    const { card, subscription: created_subscription } =
+      await validateCardAndSubscribe(payment, customer.id);
     return {
       customer,
       card,
-      subscription,
+      created_subscription,
+    };
+  } else {
+    return { customer: 'Subscription is active Already!' };
+  }
+};
+
+const createCustomer = async ({ name, email, payment }) => {
+  try {
+    // SWITCH THIS TO MONGO
+    const { data: searched_customers } = await stripe.customers.search({
+      query: `email:\'${email}\'`,
+    });
+    //customer does not exist
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    if (searched_customers.length === 0) {
+      const customer = await stripe.customers.create({
+        email,
+        name,
+      });
+      const { card, subscription } = await validateCardAndSubscribe(
+        payment,
+        customer.id
+      );
+      return {
+        card,
+        subscription,
+        customer,
+      };
+    } else {
+      //Customer's Subscription Exist!
+      const { data: customer_subscription } = await stripe.subscriptions.list({
+        customer: searched_customers[0].id,
+      });
+
+      // Update the subscription payment method if there's only one subscription!
+      if (customer_subscription.length === 1) {
+        const { customer, card, created_subscription } =
+          await updateCustomerSubscription(
+            customer_subscription[0],
+            searched_customers[0],
+            payment
+          );
+        return {
+          customer,
+          card,
+          created_subscription,
+        };
+      }
+      // IF CUSTOMER HAS NO SUBSCRIPTION
+      if (customer_subscription.length === 0) {
+        const { card, subscription } = await validateCardAndSubscribe(
+          payment,
+          searched_customers[0].id
+        );
+        return {
+          customer: searched_customers[0],
+          card: card,
+          subscription,
+        };
+      }
+    }
+
+    return {
+      message: 'Customer is not suppose to have multiple subscription',
     };
   } catch (error) {
     console.log(error);

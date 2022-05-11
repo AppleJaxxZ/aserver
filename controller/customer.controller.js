@@ -1,7 +1,7 @@
 const { customerService } = require('../service/');
 const createCustomer = async (req, res) => {
   const customer = await customerService.createCustomer(req.body);
-  res.send({ customer });
+  res.send({ ...customer });
 };
 const deleteCustomer = async (req, res) => {
   const deleted_customer = await customerService.deleteCustomerById(
