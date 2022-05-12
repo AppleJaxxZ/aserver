@@ -1,3 +1,4 @@
+const res = require('express/lib/response');
 const { stripe_secret } = require('../config/config');
 const User = require('../models/user.model');
 const stripe = require('stripe')(stripe_secret);
@@ -27,16 +28,21 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
     source: token.id,
   });
 
+
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
     metadata,
   });
+
   return {
     card,
     createdSubscription,
   };
+
+
 };
+
 
 const updateCustomerSubscription = async (
   { status, id }, //subscription
@@ -79,6 +85,7 @@ const checkOut = async ({ name, email, payment }) => {
       customer: customer_id,
     });
 
+
     // Create the Subscription if no subscription
     if (customer_subscription.length === 0) {
       const validatedAndSubscribed = await validateCardAndSubscribe(
@@ -86,6 +93,7 @@ const checkOut = async ({ name, email, payment }) => {
         customer_id,
         { email, name, phone, pin, dateOfBirth: dateOfBirth.replace(/-/g, '/') }
       );
+
 
       const { _doc } = await User.findOneAndUpdate(
         { _id: _id },
