@@ -98,12 +98,21 @@ const deleteAccount = async (req, res) => {
   const user = await User.findOne({ email: req.body.email }).lean().exec();
 
   if (user && searched_customers.length > 0) {
-    const deleted_user = await User.deleteOne({ email: req.body.email });
-    const deleted_customer = await stripe.customers.del(user.customer_id);
-    return res.send({
-      deleted_user,
-      deleted_customer,
+    const { data: customer_subscription } = await stripe.subscriptions.list({
+      customer: user.customer_id,
     });
+    if (customer_subscription.length === 1) {
+      const deleted_user = await User.deleteOne({ email: req.body.email });
+      const deleted_subscription = await stripe.subscriptions.del(
+        customer_subscription[0].id
+      );
+      return res.send({ deleted_user, deleted_subscription });
+    } else {
+      const deleted_user = await User.deleteOne({ email: req.body.email });
+      return res.send({
+        deleted_user,
+      });
+    }
   } else {
     return res.send({ user: 'does not exist' });
   }
