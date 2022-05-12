@@ -16,7 +16,6 @@ const getAllActiveSubscriptions = async (req, res) => {
 
   try {
     await activeSubscriptions.forEach((user) => {
-      console.log(user);
       const params = {
         FunctionName: 'newestScraper' /* required */,
         Payload: JSON.stringify({
@@ -25,11 +24,9 @@ const getAllActiveSubscriptions = async (req, res) => {
           dateOfBirth: user.dateOfBirth,
         }),
       };
-      console.log(params.Payload);
       lambda.invoke(params, function (err, data) {
         if (err) console.log(err, err.stack); // an error occurred
-        else console.log(data);
-        return data; // successful response
+        else return data; // successful response
       });
     });
   } catch (err) {
