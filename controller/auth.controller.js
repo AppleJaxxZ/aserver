@@ -102,16 +102,12 @@ const deleteAccount = async (req, res) => {
       customer: user.customer_id,
     });
     if (customer_subscription.length === 1) {
-      const deleted_user = await User.deleteOne({ email: req.body.email });
       const deleted_subscription = await stripe.subscriptions.del(
         customer_subscription[0].id
       );
-      return res.send({ deleted_user, deleted_subscription });
+      return res.send({ deleted_subscription, success: true });
     } else {
-      const deleted_user = await User.deleteOne({ email: req.body.email });
-      return res.send({
-        deleted_user,
-      });
+      return res.send({ message: 'You already unSubscribed', success: false });
     }
   } else {
     return res.send({ user: 'does not exist' });

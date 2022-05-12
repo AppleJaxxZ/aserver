@@ -5,8 +5,15 @@ const getAllActiveSubscriptions = async () => {
     const subscriptions = await stripe.subscriptions.list({
       status: 'active',
     });
-
-    const parse_sub = subscriptions.data.map((e, i) => e.metadata);
+    //e.metadata
+    const parse_sub = subscriptions.data.map((e, i) => {
+      return {
+        email: e.metadata.email,
+        pinNumber: e.metadata.pin,
+        phoneNumber: e.metadata.phone,
+        dateOfBirth: e.metadata.dateOfBirth,
+      };
+    });
 
     return parse_sub;
   } catch (error) {
