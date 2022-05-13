@@ -30,9 +30,8 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
 
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
-    items:
-      // [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
-      [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
+    items: [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
+    // [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
 
     metadata,
   });
@@ -134,7 +133,7 @@ const checkOut = async ({ name, email, payment }) => {
             dateOfBirth: dateOfBirth.replace(/-/g, '/'),
           }
         );
-
+        //sub_1Kz7bOAPwacIHcvVhrUoH4Y7
         const { _doc } = await User.findOneAndUpdate(
           { _id: _id },
           { subscription_id: validatedAndSubscribed.createdSubscription.id },
