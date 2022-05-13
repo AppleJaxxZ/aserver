@@ -23,14 +23,9 @@ app.use(
 );
 app.use(bodyParser.json());
 
+let server;
+
 // Connect to MongoDB
-mongoose
-  .connect(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log('MongoDB successfully connected'))
-  .catch((err) => console.log(err));
 
 app.use(passport.initialize());
 require('./config/passport')(passport);
@@ -39,4 +34,42 @@ app.use('/api/checkout', checkout);
 app.use('/api/subscription', subscription);
 app.use('/api/auth', auth);
 
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+mongoose
+  .connect(process.env.DATABASE, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    server = app.listen(port, () =>
+      console.log(`Server is running on port ${port}`)
+    );
+  })
+  .catch((err) => console.log(err));
+
+const exitHandler = () => {
+  if (server) {
+    server.close(() => {
+      console.log('server closed');
+      process.exit(1);
+    });
+  } else {
+    process.exit(1);
+  }
+};
+
+const unexpectedErrorHandler = (error) => {
+  console.log(error);
+  exitHandler();
+};
+
+process.on('uncaughtException', unexpectedErrorHandler);
+process.on('unhandledRejection', unexpectedErrorHandler);
+
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received');
+  if (server) {
+    server.close();
+  }
+});
+
+// app.listen(port, () => console.log(`Server is running on port ${port}`));
