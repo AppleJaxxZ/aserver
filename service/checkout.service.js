@@ -28,10 +28,9 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
     source: token.id,
   });
 
-
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
-    items: [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
+    items: [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
     metadata,
   });
 
@@ -39,10 +38,7 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
     card,
     createdSubscription,
   };
-
-
 };
-
 
 const updateCustomerSubscription = async (
   { status, id }, //subscription
@@ -85,7 +81,6 @@ const checkOut = async ({ name, email, payment }) => {
       customer: customer_id,
     });
 
-
     // Create the Subscription if no subscription
     if (customer_subscription.length === 0) {
       const validatedAndSubscribed = await validateCardAndSubscribe(
@@ -93,7 +88,6 @@ const checkOut = async ({ name, email, payment }) => {
         customer_id,
         { email, name, phone, pin, dateOfBirth: dateOfBirth.replace(/-/g, '/') }
       );
-
 
       const { _doc } = await User.findOneAndUpdate(
         { _id: _id },
