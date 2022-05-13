@@ -23,8 +23,6 @@ app.use(
 );
 app.use(bodyParser.json());
 
-let server;
-
 // Connect to MongoDB
 
 app.use(passport.initialize());
@@ -33,7 +31,8 @@ require('./config/passport')(passport);
 app.use('/api/checkout', checkout);
 app.use('/api/subscription', subscription);
 app.use('/api/auth', auth);
-
+mongoose.Promise = require('bluebird');
+let server;
 mongoose
   .connect(process.env.DATABASE, {
     useNewUrlParser: true,
