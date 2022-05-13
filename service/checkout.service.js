@@ -31,6 +31,8 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
     items: [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
+    // [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
+
     metadata,
   });
 
@@ -72,17 +74,12 @@ const updateCustomerSubscription = async (
 
 const checkOut = async ({ name, email, payment }) => {
   try {
-    const { customer_id, _id, phone, pin, dateOfBirth } = await User.findOne({
-      email: email,
-    });
+    const { customer_id, _id, phone, pin, dateOfBirth, subscription_id } =
+      await User.findOne({
+        email: email,
+      });
 
-    // FIND BY SUBSCRIPTION ID
-    const { data: customer_subscription } = await stripe.subscriptions.list({
-      customer: customer_id,
-    });
-
-    // Create the Subscription if no subscription
-    if (customer_subscription.length === 0) {
+    if (subscription_id === undefined) {
       const validatedAndSubscribed = await validateCardAndSubscribe(
         payment,
         customer_id,
@@ -101,10 +98,11 @@ const checkOut = async ({ name, email, payment }) => {
       };
     }
     //Does User have a subscription?
-    if (customer_subscription.length === 1) {
-      const subscription = await stripe.subscriptions.retrieve(
-        customer_subscription[0].id
-      );
+    if (subscription_id) {
+      const subscription = await stripe.subscriptions.retrieve(subscription_id);
+
+      if (subscription.status === 'active')
+        return { message: 'already active' };
 
       const updated_customer = await updateCustomerSubscription(
         subscription,
