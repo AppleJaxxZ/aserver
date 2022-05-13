@@ -30,11 +30,8 @@ const getToken = async (user, encrypted_password, password) => {
 
 const register = async (req, res) => {
   const user = await User.findOne({ email: req.body.email });
-  const { data: searched_customers } = await stripe.customers.search({
-    query: `email:\'${req.body.email}\'`,
-  });
 
-  if (user || searched_customers.length > 0) {
+  if (user) {
     return res.status(400).json({
       email: 'Email already exists In Mongo And is customer in Stripe',
     });
