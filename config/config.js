@@ -5,4 +5,5 @@ dotenv.config({ path: path.join(__dirname, '/../.env') });
 
 module.exports = {
   stripe_secret: process.env.stripe_secret,
+  price: process.env.price,
 };

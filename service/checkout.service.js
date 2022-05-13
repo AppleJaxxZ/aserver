@@ -1,5 +1,5 @@
 const res = require('express/lib/response');
-const { stripe_secret } = require('../config/config');
+const { stripe_secret, price } = require('../config/config');
 const User = require('../models/user.model');
 const stripe = require('stripe')(stripe_secret);
 
@@ -30,9 +30,7 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
 
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
-    items: [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
-    // [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
-
+    items: [{ price: price }],
     metadata,
   });
 
