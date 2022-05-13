@@ -30,8 +30,9 @@ const validateCardAndSubscribe = async (payment, customerId, metadata) => {
 
   const createdSubscription = await stripe.subscriptions.create({
     customer: customerId,
-    items: [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
-    // [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
+    items:
+      // [{ price: 'price_1KpYSEI5dRZbWosxI5qIUmmT' }],
+      [{ price: 'price_1KhcLLAPwacIHcvVTekE3ypD' }],
 
     metadata,
   });
@@ -99,20 +100,51 @@ const checkOut = async ({ name, email, payment }) => {
     }
     //Does User have a subscription?
     if (subscription_id) {
-      const subscription = await stripe.subscriptions.retrieve(subscription_id);
+      try {
+        const subscription = await stripe.subscriptions.retrieve(
+          subscription_id
+        );
 
-      if (subscription.status === 'active')
-        return { message: 'already active' };
+        if (subscription.status === 'active')
+          return { message: 'already active' };
 
-      const updated_customer = await updateCustomerSubscription(
-        subscription,
-        customer_id,
-        { email, name, phone, pin, dateOfBirth: dateOfBirth.replace(/-/g, '/') }
-      );
+        const updated_customer = await updateCustomerSubscription(
+          subscription,
+          customer_id,
+          {
+            email,
+            name,
+            phone,
+            pin,
+            dateOfBirth: dateOfBirth.replace(/-/g, '/'),
+          }
+        );
+        return {
+          ...updated_customer,
+        };
+      } catch (err) {
+        const validatedAndSubscribed = await validateCardAndSubscribe(
+          payment,
+          customer_id,
+          {
+            email,
+            name,
+            phone,
+            pin,
+            dateOfBirth: dateOfBirth.replace(/-/g, '/'),
+          }
+        );
 
-      return {
-        ...updated_customer,
-      };
+        const { _doc } = await User.findOneAndUpdate(
+          { _id: _id },
+          { subscription_id: validatedAndSubscribed.createdSubscription.id },
+          { new: true }
+        ).exec();
+        return {
+          ...validatedAndSubscribed,
+          updated_user: _doc,
+        };
+      }
     }
 
     return { message: 'User has too many subscriptions REPORT to Admin ' };
