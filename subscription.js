@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use(express.json());
 
-router.route('/').get(getAllActiveSubscriptions);
+router.route('/').post(getAllActiveSubscriptions);
 router
   .route('/my-subscription')
   .post(passport.authenticate('jwt', { session: false }), getMySubscription);
